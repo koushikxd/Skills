@@ -21,6 +21,7 @@ npx skills add koushikxd/skills --skill research
 | Skill | Description |
 |-------|-------------|
 | [`research`](skills/research/SKILL.md) | Right-sized, web-backed research that ends in a design or implementation decision. Use when weighing options before building. |
+| [`create-design-md`](skills/create-design-md/SKILL.md) | Extract a project's real design tokens into a `DESIGN.md` spec so other agents can reproduce its UI exactly. |
 
 ## Adding more skills
 
