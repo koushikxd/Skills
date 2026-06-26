@@ -57,7 +57,9 @@ Write only sections your extraction supports. Inferred or `unknown` material is 
 
 Keep it one file and keep it lean. This is the file an agent loads whole to place one button, so it competes for context every time. The frontmatter holds values; prose holds *application* — "`gray-1000` is body text, `gray-500` is muted metadata", not "our typography creates a harmonious reading experience". Anything that is neither a value nor a rule for applying one gets cut. The frequency rule already keeps tokens lean (don't document a 10-step ramp when 4 are used); apply the same restraint to prose. Keep the prose plain, too — no decorative glyphs or symbols dressing up warnings and list items; the agent reads the sentence, not the ornament. A symbol earns a place only when it is itself an extracted value, never as decoration. Don't split into multiple files — the whole value is pointing an agent at one path.
 
-**Completion criterion:** `DESIGN.md` exists with frontmatter tokens and prose; every section is either populated from Step 2 or explicitly marked `unknown`/omitted-with-reason.
+Make the spec discoverable. A spec nothing points to is a spec nothing reads. If the project already has a `CLAUDE.md` or `AGENTS.md`, append one line directing agents to the spec for UI work (e.g. `For any UI or design work, follow ./DESIGN.md.`) — but only when no such pointer is there yet, and never create the file when it's absent.
+
+**Completion criterion:** `DESIGN.md` exists with frontmatter tokens and prose; every section is either populated from Step 2 or explicitly marked `unknown`/omitted-with-reason; and where a `CLAUDE.md`/`AGENTS.md` exists, a single pointer to the spec is present.
 
 ## Step 4 — Verify against the code
 
