@@ -1,13 +1,12 @@
 ---
 name: research
-description: Right-sized, web-backed research that ends in a design or implementation decision. Use when you're weighing options before building and ask "what's the best way to..." / "should I use X or Y" / "research X before I build it".
+description: Right-sized, web-backed research that ends in a recommendation. Use when you're weighing options and ask "what's the best way to..." / "should I use X or Y" / "what should I use for X" / "research X before I commit".
 ---
 
 # Right-Sized Research
 
 You research a decision the user has to make, then commit to a recommendation. Web-first,
-not from memory — trained knowledge is stale for tools, versions, and benchmarks. Scale the
-effort to the question, then commit — don't spawn a fleet to settle a one-liner.
+not from memory — trained knowledge is stale for tools, versions, and benchmarks.
 
 ## Rule 0: right-size before you spawn
 
@@ -45,10 +44,11 @@ Break the question into independent facets — only as many as it needs. Useful 
 *how leaders do it · frameworks & maturity · tradeoffs for THIS context · recent evidence
 (last ~12-18 months)*. For each facet that warrants a sub-agent, launch them **in one message**
 (parallel). Give each a NARROW brief — its facet plus only the context it needs, not this
-whole prompt. Every sub-agent must **search the live web** and return findings **with real
-source URLs** — concrete tools, versions, numbers; an unsourced claim is a guess. Favor what
-real production systems run over theory, and separate what's *popular* from what's *right for
-this context*.
+whole prompt. Every sub-agent must **search the live web** and trace each claim to its
+**primary source** — the doc, repo, benchmark, or spec that *owns* the fact, not a secondary
+write-up quoting it. Return findings **with real source URLs** — concrete tools, versions,
+numbers; an unsourced claim is a guess. Favor what real production systems run over theory,
+and separate what's *popular* from what's *right for this context*.
 
 Done when every facet that could change the call has a sourced answer; flag anything still
 speculative or dated rather than papering over it.
@@ -62,13 +62,18 @@ lands, change the call. State what the strongest objection was and how it surviv
 
 ### 4. Recommend
 Lead with the call, then justify. Cover:
-- **Recommendation** — which approach fits the stated constraints, and why; say whether you
-  optimized for demo-first or scale-later
+- **Recommendation** — which option fits the stated constraints, and why; name the
+  constraint you optimized for (demo-first, lowest cost, scale-later, etc.)
 - **How to start** — the concrete first steps for the chosen path
 - **Tradeoffs & risks** — what you give up; what bites later (informed by step 3)
 - **When to revisit** — the signal that would change this decision (e.g. scale threshold)
 - **Sources** — the strongest references behind the call
 
-Weight conflicting findings by **cross-source agreement**: a claim several sources hit
-independently beats a single blog post, and where they disagree, surface it rather than
-paper over it. Say so.
+Weight findings by **primary-source** authority first — the source that owns a fact beats
+any number of write-ups restating it. Use **cross-source agreement** only to break ties
+between primaries; where primaries genuinely disagree, surface it rather than paper over it.
+
+**Persist by size** (Rule 0): broad research (3-5 agents) earns a saved artifact — write the
+full findings and sources to one Markdown file where the repo already keeps such notes,
+matching the existing convention; if there is none, put it somewhere sensible and say where.
+It can then seed the build or a follow-up. Small research answers in chat only.
