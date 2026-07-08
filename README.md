@@ -13,14 +13,14 @@ npx skills add koushikxd/skills
 Or install a single skill by name:
 
 ```bash
-npx skills add koushikxd/skills --skill research
+npx skills add koushikxd/skills --skill deep-research
 ```
 
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| [`research`](skills/research/SKILL.md) | Right-sized, web-backed research that ends in a design or implementation decision. Use when weighing options before building. |
+| [`deep-research`](skills/deep-research/SKILL.md) | Right-sized, web-backed research that ends in a design or implementation decision. Use when weighing options before building. |
 | [`create-design-md`](skills/create-design-md/SKILL.md) | Extract a project's real design tokens into a `DESIGN.md` spec so other agents can reproduce its UI exactly. |
 
 ## Adding more skills

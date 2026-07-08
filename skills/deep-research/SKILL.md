@@ -1,5 +1,5 @@
 ---
-name: research
+name: deep-research
 description: Right-sized, web-backed research that ends in a recommendation. Use when you're weighing options and ask "what's the best way to..." / "should I use X or Y" / "what should I use for X" / "research X before I commit".
 ---
 
