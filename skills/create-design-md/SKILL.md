@@ -7,6 +7,8 @@ description: Generate or update a DESIGN.md — a grounded design-system spec ex
 
 You read a project's UI code and distill it into a `DESIGN.md` that another agent can follow to build new screens indistinguishable from the existing ones — like the curated `DESIGN.md` files Vercel (Geist) and Mintlify ship.
 
+`DESIGN.md` has a canonical skeleton: YAML token frontmatter in fixed groups, then prose in a fixed section order (both in `REFERENCE.md`). Conform to it so any agent fluent in the format reads yours without surprise. This skill's edge — the Consumption and Patterns sections, the atmosphere read — layers on top of that skeleton, never replaces it.
+
 Those examples are curated *to their own apps*. Yours must be too. The document is only useful if every value is **ground truth** — pulled from this project's code, not invented. A plausible palette that isn't the project's real palette is worse than a gap: it produces confidently-wrong UI that looks intentional.
 
 One rule sits under everything: **every token traces to a source.** Follow it everywhere. When you can't find a value, you mark it `unknown` — you never fill it with a sensible default.
@@ -43,9 +45,9 @@ Pull the real values from the sources you mapped. If Step 1 flagged this as an *
 
 ## Step 3 — Synthesize DESIGN.md
 
-Write `DESIGN.md` at the project root following the anatomy in `REFERENCE.md`: machine-readable YAML frontmatter (the tokens) followed by prose sections that explain *how* to apply them — Overview, **Consumption**, Colors, Typography, Layout, Elevation, Motion, Shapes, Components, **Patterns**, Voice & Content, Do's and Don'ts. Read `REFERENCE.md` for the full template before writing.
+Write `DESIGN.md` at the project root following the anatomy in `REFERENCE.md`: machine-readable YAML frontmatter (the tokens) followed by prose sections that explain *how* to apply them. Keep the frontmatter groups and section order the format defines; slot this skill's additions into their fixed places rather than inventing a new skeleton. The order is Overview, **Consumption**, Colors, Typography, Layout, Elevation & Depth, Motion, Shapes, Components, **Patterns**, Voice & Content, Do's and Don'ts — the format's canonical sections in their canonical order, with Consumption, Motion, Patterns, and Voice & Content added as extensions. Read `REFERENCE.md` for the full template before writing.
 
-The **Consumption** section is what makes the file produce correct code rather than look-alike code: state plainly how this project binds tokens to code — "reference tokens via Tailwind utilities (`bg-background-primary`), never raw hex"; "import primitives from `@/components/ui`" — so an agent building a new feature reaches for the binding, not the literal value.
+The **Consumption** section writes the binding mechanism from Step 2 into the file for the reader: which mechanism this codebase uses, the primitive import path, and the rule to reach for the binding over the literal. Put it right after Overview — it is what makes the file produce correct code rather than look-alike code.
 
 The **Patterns** section is what lets the file stand alone instead of sending an agent to study a sibling feature: capture the app's recurring composition — page scaffolding, how forms/lists/empty-states/headers are assembled, the spacing rhythm between sections. Tokens give the look; patterns give the layout grammar that makes a new feature read as native. Omit it only when the project has too few screens to generalize (a thin bootstrap spec); it fills in on the update run.
 
