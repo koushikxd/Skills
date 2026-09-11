@@ -23,7 +23,7 @@ npx skills add koushikxd/skills --skill deep-research
 | [`deep-research`](skills/deep-research/SKILL.md) | Right-sized, web-backed research that ends in a design or implementation decision. Use when weighing options before building. |
 | [`create-design-md`](skills/create-design-md/SKILL.md) | Extract a project's real design tokens into a `DESIGN.md` spec so other agents can reproduce its UI exactly. |
 | [`debrief`](skills/debrief/SKILL.md) | Understand what just happened. Opens an HTML page explaining the session's work in plain English, with root causes, flow diagrams, and before/after. Invoke by hand with `/debrief`. |
-| [`babysit-pr`](skills/babysit-pr/SKILL.md) | Watch a pull request until its automated reviewers go quiet: poll for new bot comments, judge each one, fix what deserves fixing, push, repeat. |
+| [`babysit-pr`](skills/babysit-pr/SKILL.md) | Watch a pull request until its automated reviewers go quiet. Polls for new bot comments, verifies each claim against the code, fixes what deserves fixing, pushes, repeats. |
 
 ## Adding more skills
 

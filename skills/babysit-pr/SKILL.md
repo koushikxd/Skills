@@ -1,6 +1,6 @@
 ---
 name: babysit-pr
-description: Babysit a pull request until its automated reviewers go quiet: poll for new bot comments, judge each one, fix what deserves fixing, push, repeat. Use when the user wants a PR watched, wants CodeRabbit/Greptile/Copilot/Codex review comments handled, or wants to keep iterating until the reviews are clean.
+description: Babysit a pull request until its automated reviewers go quiet. Poll for new bot comments, verify each claim against the code, fix what deserves fixing, push, repeat. Use when the user wants a PR watched, wants CodeRabbit/Greptile/Copilot/Codex review comments handled, or wants to keep iterating until the reviews are clean.
 ---
 
 You are babysitting a PR. Stay with it, on your own, until the automated reviewers have nothing left to say.
