@@ -16,7 +16,7 @@ When invoking this skill:
 1. **Clarify intent.** Figure out what the user wants. If unclear, ask. Inline args ("use codex to review my auth plan") usually carry the intent, so infer from them. Common buckets: second-opinion code review, refactor, plan validation, implementation of features, fresh perspective on a stuck bug, parallel comparison of approaches.
 2. **Pick model + reasoning by task complexity** (see Model + Reasoning Selection). Default: `gpt-5.6-terra` at `high`.
 3. **Preflight before fan-out.** Before launching multiple agents, confirm codex is authenticated and not rate-limited: run `command codex login status` (or one cheap low-effort probe) first. Hitting a 401 or rate limit five agents into a fan-out wastes every agent already launched.
-4. **Spawn the subagent** using the canonical invocation (Basic Usage). Pipe long prompts via stdin. For anything expected to run more than a minute, or any fan-out, run it in the background (see Background Fan-Out) so the parent keeps working.
+4. **Spawn the subagent** using the canonical invocation (Basic Usage), with the sandbox disabled (Invocation Mechanics). Pipe long prompts via stdin. For anything expected to run more than a minute, or any fan-out, run it in the background (see Background Fan-Out) so the parent keeps working.
 5. **Act autonomously while it runs.** Don't ask for permission mid-flight; the parent only sees the final result, so mid-task pauses waste tokens. Pause only for genuinely destructive operations (data loss, external impact, security).
 6. **Monitor, don't fire-and-forget.** Check completion, retry on failure, answer follow-ups if blocked. Feel free to run multiple sequential or parallel codex subagents.
 7. **Verify independently, mandatory.** Codex reporting success is a claim, not a result (see Verification). Never relay its summary as verified fact, and never dispatch dependent work on top of an unverified result.
@@ -59,11 +59,23 @@ python3 -c "import json,os; d=json.load(open(os.path.expanduser('~/.codex/models
 
 Note the `fetched_at` date. This cache goes stale and routinely omits models that work fine. A model missing from the cache is not evidence it's unavailable; a one-line low-effort probe is the only real test.
 
-## Shell Note: always use `command codex`
+## Invocation Mechanics
 
-`codex` is often aliased in an interactive shell, for example to `clear && codex --yolo`. A bare `codex exec` then expands to `clear && codex --yolo exec ...`, which injects terminal escape sequences (`\x1b[H\x1b[J`) into stdout and corrupts any `--json` parsing.
+Two things hold for every call below. Both failures masquerade as something else, so get them right the first time.
 
-**Always invoke as `command codex`** to bypass the alias. Every example below does.
+**Always invoke as `command codex`.** `codex` is often aliased in an interactive shell, for example to `clear && codex --yolo`. A bare `codex exec` then expands to `clear && codex --yolo exec ...`, which injects terminal escape sequences (`\x1b[H\x1b[J`) into stdout and corrupts any `--json` parsing. Every example below uses `command codex`.
+
+**Claude Code parent: run `codex exec` outside the Bash sandbox.** `codex exec` starts its own app-server process and needs filesystem access the sandbox denies. Sandboxed, every run dies at startup with `Error: failed to initialize in-process app-server client: Operation not permitted (os error 1)`. This is a fixed property of the tool, not a transient failure, so a sandboxed attempt is pure waste. Set `dangerouslyDisableSandbox: true` on the *first* attempt of *every* `codex exec` Bash call, including background and fan-out calls. The harness default of retrying inside the sandbox first applies to commands that might work there; this one cannot.
+
+The one-time fix that retires the flag: exempt the command in `~/.claude/settings.json`, which takes effect live, no restart.
+
+```json
+{ "sandbox": { "excludedCommands": ["command codex:*"] } }
+```
+
+Exempted calls run unsandboxed with no per-call flag and no prompt. A pipeline matches if *any* of its sub-commands does, so heredoc-into-codex works. Suggest this to the user once if you find yourself reaching for the flag.
+
+Note that `command codex login status` runs fine sandboxed either way, so a green preflight says nothing about whether `exec` will start.
 
 ## Intelligent Prompting
 
