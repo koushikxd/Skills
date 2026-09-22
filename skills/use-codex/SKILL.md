@@ -14,7 +14,7 @@ Spawn autonomous Codex CLI subagents to offload context-heavy work. Subagents bu
 When invoking this skill:
 
 1. **Clarify intent.** Figure out what the user wants. If unclear, ask. Inline args ("use codex to review my auth plan") usually carry the intent, so infer from them. Common buckets: second-opinion code review, refactor, plan validation, implementation of features, fresh perspective on a stuck bug, parallel comparison of approaches.
-2. **Pick model + reasoning by task complexity** (see Model + Reasoning Selection). Default: `gpt-5.6-terra` at `high`.
+2. **Pick model + reasoning by task complexity** (see Model + Reasoning Selection). Default: `gpt-6-luna` at `high`.
 3. **Preflight before fan-out.** Before launching multiple agents, confirm codex is authenticated and not rate-limited: run `command codex login status` (or one cheap low-effort probe) first. Hitting a 401 or rate limit five agents into a fan-out wastes every agent already launched.
 4. **Spawn the subagent** using the canonical invocation (Basic Usage), with the sandbox disabled (Invocation Mechanics). Pipe long prompts via stdin. For anything expected to run more than a minute, or any fan-out, run it in the background (see Background Fan-Out) so the parent keeps working.
 5. **Act autonomously while it runs.** Don't ask for permission mid-flight; the parent only sees the final result, so mid-task pauses waste tokens. Pause only for genuinely destructive operations (data loss, external impact, security).
@@ -26,30 +26,35 @@ When invoking this skill:
 
 Scale the model AND reasoning effort to task complexity.
 
-The GPT-5.6 family supersedes `gpt-5.5`. Ranked by raw capability:
+The GPT-6 family supersedes GPT-5.6. There is no GPT-6 Terra; Luna replaces it as the workhorse. Ranked by raw capability:
 
-1. **`gpt-5.6-sol`**: the strongest. Expensive and slow.
-2. **`gpt-5.6-terra`**: the workhorse. **This is the default.**
-3. **`gpt-5.6-luna`**: roughly GPT-5.5 rebased, cheaper and faster, not smarter.
+1. **`gpt-6-astra`**: the strongest. Roughly 4-5x Sol's cost per task.
+2. **`gpt-6-sol`**: the heavy hitter. Beats `gpt-5.6-sol` at every price point.
+3. **`gpt-6-luna`**: the workhorse, cheaper and better than `gpt-5.6-terra`. **This is the default.**
 
-Two calibration points that drive every routing decision:
+Two calibration points (from OpenAI's AutomationBench cost/score curves) drive every routing decision:
 
-- **Sol at `medium` ≈ Terra at `xhigh`.** Same effective capability. Prefer Terra `xhigh` unless you specifically need Sol's headroom, because there's nowhere to escalate from Sol.
-- **Sol at `xhigh` is the ceiling.** Reserve it for problems that have already defeated a Terra `xhigh` pass. Don't open with it.
+- **Luna at its top effort ≈ Sol at its lowest, at about 1/5 the cost.** Exhaust Luna `xhigh` before reaching for Sol.
+- **Sol at its best beats Astra at its cheapest, at about 1/4 the cost.** Astra is the ceiling. Reserve it for problems that have already defeated a Sol `xhigh` pass. Don't open with it.
 
-Terra on `medium`/`high`/`xhigh` is the right call for the overwhelming majority of delegated work. Use judgement; the table is a starting point, not a rule.
+GPT-6 also fabricates far less on OpenAI's coding-deception eval (Astra 0.5%, Sol 1.3%, Luna 2.8%, vs ~10% for GPT-5.6). Not zero: Verification stays mandatory.
+
+Luna on `medium`/`high`/`xhigh` is the right call for the overwhelming majority of delegated work. Use judgement; the table is a starting point, not a rule.
 
 | Complexity | Model | Reasoning |
 |---|---|---|
-| Trivial (lookup, one-liner, format fix) | `gpt-5.4-mini` or `gpt-5.3-codex-spark` | `low` |
-| Simple/short (small edit, quick search, basic script) | `gpt-5.6-luna` | `low` |
-| Standard implementation (feature, refactor, multi-file) | `gpt-5.6-terra` | `high` |
-| Hard/long-horizon (architecture, big migration, deep review) | `gpt-5.6-terra` | `xhigh` |
-| Brutal (stuck bug that survived a Terra `xhigh` pass, subtle correctness, gnarly concurrency) | `gpt-5.6-sol` | `high`, then `xhigh` |
+| Trivial (lookup, one-liner, format fix) | `gpt-6-luna` | `low` |
+| Simple/short (small edit, quick search, basic script) | `gpt-6-luna` | `medium` |
+| Standard implementation (feature, refactor, multi-file) | `gpt-6-luna` | `high` |
+| Hard/long-horizon (architecture, big migration, deep review) | `gpt-6-luna` | `xhigh` |
+| Brutal (stuck bug that survived a Luna `xhigh` pass, subtle correctness, gnarly concurrency) | `gpt-6-sol` | `high`, then `xhigh` |
+| Ceiling (survived a Sol `xhigh` pass) | `gpt-6-astra` | `high`, then `xhigh` |
 
-Escalation ladder when a pass comes back wrong: Terra `high` → Terra `xhigh` → Sol `high` → Sol `xhigh`. Escalate on *evidence of failure*, not on a hunch that the task looks hard.
+Escalation ladder when a pass comes back wrong: Luna `high` → Luna `xhigh` → Sol `high` → Sol `xhigh` → Astra `high` → Astra `xhigh`. Escalate on *evidence of failure*, not on a hunch that the task looks hard.
 
-Set via `-m <model> -c 'model_reasoning_effort="<effort>"'`. `gpt-5.5` remains valid as a fallback if a 5.6 variant errors.
+GPT-6 adds `max` (all three) and `ultra` (Sol, Astra only) above `xhigh`. No calibration data exists for them yet, so don't route to them by default.
+
+Set via `-m <model> -c 'model_reasoning_effort="<effort>"'`. `gpt-5.6-sol` and `gpt-5.5` remain valid fallbacks if a GPT-6 variant errors.
 
 To list what the local CLI thinks is available:
 
@@ -126,11 +131,11 @@ Vague prompts produce vague work; specific prompts produce useful work.
 
 **Default: pipe the prompt via stdin using `-` as the positional argument.** Inline string prompts work for short ones, but anything with newlines, quotes, backticks, or `$` should be piped to avoid shell-escaping bugs.
 
-Canonical invocation (capture output to file, Terra at high reasoning):
+Canonical invocation (capture output to file, Luna at high reasoning):
 
 ```bash
 cat <<'EOF' | command codex exec --yolo --skip-git-repo-check \
-  -m gpt-5.6-terra -c 'model_reasoning_effort="high"' \
+  -m gpt-6-luna -c 'model_reasoning_effort="high"' \
   -o /tmp/codex-result.txt -
 [TASK CONTEXT]
 You are analyzing /path/to/repo.
@@ -148,9 +153,10 @@ result=$(cat /tmp/codex-result.txt)
 
 **Variants** (only what changes from the canonical form):
 
-- **Trivial task:** swap to `-m gpt-5.6-luna -c 'model_reasoning_effort="low"'`.
-- **Hard/long-horizon task:** raise to `-c 'model_reasoning_effort="xhigh"'`, model stays Terra.
-- **Brutal task, after a Terra `xhigh` pass already failed:** swap to `-m gpt-5.6-sol -c 'model_reasoning_effort="high"'`.
+- **Trivial task:** swap to `-c 'model_reasoning_effort="low"'`, model stays Luna.
+- **Hard/long-horizon task:** raise to `-c 'model_reasoning_effort="xhigh"'`, model stays Luna.
+- **Brutal task, after a Luna `xhigh` pass already failed:** swap to `-m gpt-6-sol -c 'model_reasoning_effort="high"'`.
+- **Ceiling task, after a Sol `xhigh` pass already failed:** swap to `-m gpt-6-astra -c 'model_reasoning_effort="high"'`.
 - **Machine-parsable output:** swap `-o /tmp/codex-result.txt` for `--json`, then pipe through `jq -r 'select(.event=="turn.completed") | .content'`. Prefer `-o` whenever possible: it skips JSON parsing and avoids terminal truncation on long outputs.
 
 ## Parallel Subagents
@@ -159,12 +165,12 @@ Spawn multiple subagents for independent tasks: research two topics in parallel,
 
 ```bash
 cat <<'EOF' | command codex exec --yolo --skip-git-repo-check \
-  -m gpt-5.6-terra -c 'model_reasoning_effort="high"' -o /tmp/agent-a.txt - &
+  -m gpt-6-luna -c 'model_reasoning_effort="high"' -o /tmp/agent-a.txt - &
 Approach A: solve [problem] using [strategy A]. Return diff + rationale.
 EOF
 
 cat <<'EOF' | command codex exec --yolo --skip-git-repo-check \
-  -m gpt-5.6-terra -c 'model_reasoning_effort="high"' -o /tmp/agent-b.txt - &
+  -m gpt-6-luna -c 'model_reasoning_effort="high"' -o /tmp/agent-b.txt - &
 Approach B: solve [problem] using [strategy B]. Return diff + rationale.
 EOF
 
@@ -211,7 +217,7 @@ When the parent is driving a multi-step engagement, each next call is a *judgmen
 ```bash
 # Step 1: dispatch the first subagent
 cat <<'EOF' | command codex exec --yolo --skip-git-repo-check \
-  -m gpt-5.6-terra -c 'model_reasoning_effort="high"' \
+  -m gpt-6-luna -c 'model_reasoning_effort="high"' \
   -o /tmp/codex-step-1.txt -
 Implement the auth middleware in src/middleware/auth.ts per the spec at docs/auth.md.
 Return: summary of changes + files touched.
@@ -232,7 +238,7 @@ Review the auth middleware changes summarized below for security holes
 EOF
   cat /tmp/codex-step-1.txt
 } | command codex exec --yolo --skip-git-repo-check \
-  -m gpt-5.6-terra -c 'model_reasoning_effort="high"' \
+  -m gpt-6-luna -c 'model_reasoning_effort="high"' \
   -o /tmp/codex-step-2.txt -
 
 # Step 3: parent reads /tmp/codex-step-2.txt, dispatches a fix pass, or moves
@@ -256,6 +262,6 @@ The session id is printed at the start of every run (`session id: 019f9ce2-...`)
 
 If Codex is rate-limited or out of quota, don't silently downgrade the task. Options in order:
 
-1. **Drop a tier within the family.** Terra `xhigh` → Terra `high` → Luna `low`. Cheaper reasoning often clears a soft rate limit.
-2. **Fall back to `gpt-5.5`**, which is still served and unaffected by 5.6-family limits.
+1. **Drop a tier within the family.** Sol `xhigh` → Sol `high` → Luna `high` → Luna `low`. Cheaper reasoning often clears a soft rate limit.
+2. **Fall back to the previous generation**: `gpt-5.6-sol`, then `gpt-5.5`.
 3. **Tell the user and stop.** A blown quota mid-fan-out means some agents completed and some didn't. Report exactly which `-o` files have real content before deciding anything else.
