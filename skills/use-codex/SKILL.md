@@ -67,15 +67,7 @@ Two things hold for every call below. Both failures masquerade as something else
 
 **Claude Code parent: run `codex exec` outside the Bash sandbox.** `codex exec` starts its own app-server process and needs filesystem access the sandbox denies. Sandboxed, every run dies at startup with `Error: failed to initialize in-process app-server client: Operation not permitted (os error 1)`. This is a fixed property of the tool, not a transient failure, so a sandboxed attempt is pure waste. Set `dangerouslyDisableSandbox: true` on the *first* attempt of *every* `codex exec` Bash call, including background and fan-out calls. The harness default of retrying inside the sandbox first applies to commands that might work there; this one cannot.
 
-The one-time fix that retires the flag: exempt the command in `~/.claude/settings.json`, which takes effect live, no restart.
-
-```json
-{ "sandbox": { "excludedCommands": ["command codex:*"] } }
-```
-
-Exempted calls run unsandboxed with no per-call flag and no prompt. A pipeline matches if *any* of its sub-commands does, so heredoc-into-codex works. Suggest this to the user once if you find yourself reaching for the flag.
-
-Note that `command codex login status` runs fine sandboxed either way, so a green preflight says nothing about whether `exec` will start.
+Note that `command codex login status` runs fine sandboxed, so a green preflight says nothing about whether `exec` will start.
 
 ## Intelligent Prompting
 
