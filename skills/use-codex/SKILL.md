@@ -66,13 +66,15 @@ Note the `fetched_at` date. This cache goes stale and routinely omits models tha
 
 ## Invocation Mechanics
 
-Two things hold for every call below. Both failures masquerade as something else, so get them right the first time.
+Three things hold for every call below. Each failure masquerades as something else, so get them right the first time.
 
 **Always invoke as `command codex`.** `codex` is often aliased in an interactive shell, for example to `clear && codex --yolo`. A bare `codex exec` then expands to `clear && codex --yolo exec ...`, which injects terminal escape sequences (`\x1b[H\x1b[J`) into stdout and corrupts any `--json` parsing. Every example below uses `command codex`.
 
 **Claude Code parent: run `codex exec` outside the Bash sandbox.** `codex exec` starts its own app-server process and needs filesystem access the sandbox denies. Sandboxed, every run dies at startup with `Error: failed to initialize in-process app-server client: Operation not permitted (os error 1)`. This is a fixed property of the tool, not a transient failure, so a sandboxed attempt is pure waste. Set `dangerouslyDisableSandbox: true` on the *first* attempt of *every* `codex exec` Bash call, including background and fan-out calls. The harness default of retrying inside the sandbox first applies to commands that might work there; this one cannot.
 
 Note that `command codex login status` runs fine sandboxed, so a green preflight says nothing about whether `exec` will start.
+
+**Every path in a `codex exec` call is a literal absolute path under `/tmp/`.** `$TMPDIR` resolves differently on each side of the sandbox (`/tmp/claude-<uid>` inside, `/var/folders/.../T/` outside), so a brief written to `$TMPDIR` by the Write tool or a sandboxed Bash call is missing when the unsandboxed `codex exec` reads it, and the run exits 1 at startup. Keep the prompt in the same command's heredoc (Basic Usage). When a brief file is genuinely needed, write it to `/tmp/codex-<name>-brief.md` and pass that exact literal path; give `-o` a literal path too (`/tmp/codex-<name>.txt`).
 
 ## Intelligent Prompting
 
