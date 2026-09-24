@@ -7,8 +7,6 @@ description: Spawn one or more OpenAI Codex CLI subagents from bash to offload c
 
 Spawn autonomous Codex CLI subagents to offload context-heavy work. Subagents burn their own tokens and return only their final message, so the parent's context stays clean.
 
-**Golden Rule:** If task + intermediate work would add 3,000+ tokens to parent context, use a subagent.
-
 ## Instructions
 
 When invoking this skill:
@@ -26,7 +24,7 @@ When invoking this skill:
 
 Scale the model AND reasoning effort to task complexity.
 
-The GPT-6 family supersedes GPT-5.6. There is no GPT-6 Terra; Luna replaces it as the workhorse. Ranked by raw capability:
+Ranked by raw capability:
 
 1. **`gpt-6-astra`**: the strongest. Roughly 4-5x Sol's cost per task.
 2. **`gpt-6-sol`**: the heavy hitter. Beats `gpt-5.6-sol` at every price point.
@@ -36,8 +34,6 @@ Two calibration points (from OpenAI's AutomationBench cost/score curves) drive e
 
 - **Luna at its top effort ≈ Sol at its lowest, at about 1/5 the cost.** Exhaust Luna `xhigh` before reaching for Sol.
 - **Sol at its best beats Astra at its cheapest, at about 1/4 the cost.** Astra is the ceiling. Reserve it for problems that have already defeated a Sol `xhigh` pass. Don't open with it.
-
-GPT-6 also fabricates far less on OpenAI's coding-deception eval (Astra 0.5%, Sol 1.3%, Luna 2.8%, vs ~10% for GPT-5.6). Not zero: Verification stays mandatory.
 
 Luna on `medium`/`high`/`xhigh` is the right call for the overwhelming majority of delegated work. Use judgement; the table is a starting point, not a rule.
 
@@ -106,28 +102,6 @@ Return: ...
 [SUCCESS CRITERIA]
 Complete when: ...
 ```
-
-### Good vs. Bad Prompts
-
-Vague prompts produce vague work; specific prompts produce useful work.
-
-**Research**
-
-❌ "Research authentication"
-
-✅ "Research authentication in this Next.js codebase. Focus on: 1) Session management strategy (JWT vs session cookies), 2) Auth provider integration (NextAuth, Clerk, etc), 3) Protected route patterns. Check /app, /lib/auth, and middleware files. Return architecture summary with code examples."
-
-**Web search / docs lookup**
-
-❌ "Search for Codex SDK"
-
-✅ "Find the most recent Codex SDK documentation using the web and summarize key updates. Focus on: 1) Installation/quickstart, 2) Core API methods and parameters, 3) Breaking changes or deprecations. Prioritize official OpenAI docs and release notes. Return a concise summary with citations."
-
-**API discovery**
-
-❌ "Find API endpoints"
-
-✅ "Find all REST API endpoints in this Express.js app. Look in /routes, /api, and /controllers directories. For each endpoint document: method (GET/POST/etc), path, auth requirements, request/response schemas. Return as markdown table."
 
 ## Basic Usage
 
