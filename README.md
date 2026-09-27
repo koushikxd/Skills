@@ -25,7 +25,7 @@ npx skills add koushikxd/skills --skill deep-research
 | [`debrief`](skills/debrief/SKILL.md) | Understand what just happened. Opens an HTML page explaining the session's work in plain English, with root causes, flow diagrams, and before/after. Invoke by hand with `/debrief`. |
 | [`babysit-pr`](skills/babysit-pr/SKILL.md) | Watch a pull request until its automated reviewers go quiet. Polls for new bot comments, verifies each claim against the code, fixes what deserves fixing, pushes, repeats. |
 | [`use-codex`](skills/use-codex/SKILL.md) | Delegate context-heavy work to OpenAI Codex CLI subagents from bash. Covers model and reasoning selection, parallel fan-out, session resume, and mandatory verification. |
-| [`view-tweet`](skills/view-tweet/SKILL.md) | Read X/Twitter post links through the Grok CLI and bring back the verbatim text, full thread, quoted post, media, and replies as context. |
+| [`view-tweet`](skills/view-tweet/SKILL.md) | Read X/Twitter post links as context: exact text, full thread, metrics, quoted post, and media via the fxtwitter API, with the Grok CLI for mid-thread links and replies. |
 
 ## Adding more skills
 

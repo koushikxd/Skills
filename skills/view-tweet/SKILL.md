@@ -1,15 +1,52 @@
 ---
 name: view-tweet
-description: Read X/Twitter posts through the Grok CLI, returning verbatim text, the full thread, quoted post, media, and top replies as context. Use when the user shares an x.com or twitter.com post link.
+description: Read X/Twitter post links as context, exact text, full thread, metrics, quoted post, and media via the fxtwitter API, with the Grok CLI for mid-thread links and replies. Use when the user shares an x.com or twitter.com post link.
 ---
 
 # View Tweet
 
-Your own fetch tools cannot read X: x.com answers with a 402 or a login wall. Grok's `WebFetch` gets the rendered post, including every post in the author's thread. Run `grok` headless once per link, then use its transcription as context for whatever the user actually asked.
+Your own fetch tools cannot read X: x.com answers with a 402 or a login wall. Two routes can:
 
-## Invocation
+- **fxtwitter API**: free, instant, exact. X's own data as JSON: every post of the author's thread verbatim, metrics, quoted post, media URLs. Blind to reply text.
+- **Grok CLI**: Grok's `WebFetch` reads the rendered x.com page. It sees replies and can place a mid-thread post in its thread, but costs Grok usage, takes about 20s, and its output is a model transcription, so long posts arrive cut at "Show more".
 
-Substitute the link for `<URL>`, keep the rest of the prompt as is:
+fxtwitter is the source of truth; grok fills its gaps. Process each link through the steps below, then use the result as context for whatever the user actually asked.
+
+## 1. fxtwitter
+
+Take the status id from the link (the digits after `/status/`; `twitter.com` and `?s=` query strings are fine):
+
+```bash
+curl -s https://api.fxtwitter.com/2/thread/<id> | jq '{code, thread: [.thread[]? | {url, author: .author.screen_name, created_at, text, likes, reposts, replies, views, quote: (.quote | if . then "@\(.author.screen_name): \(.text)" else null end), media: [.media.all[]? | "\(.type) \(.url)"]}]}'
+```
+
+Runs fine inside the sandbox. Branch on the result:
+
+- **`thread` has posts**: done. A standalone post is a thread of one. The posts are in order, and each `text` is verbatim.
+- **`code` 200 with an empty `thread`**: the link points into the middle of a thread, and fxtwitter returns nothing for it. Go to step 2.
+- **`code` 404**: the post is deleted, private, or the link is wrong. Tell the user which link failed. The post's content comes only from a successful read, never from memory or the URL slug.
+- **Any other failure** (no JSON, 5xx, timeout): read the post with grok's full read (step 3) instead.
+
+To see an image, download its media URL to `$TMPDIR` and view the file.
+
+## 2. Mid-thread link: find the root
+
+Ask grok for the thread's first post, then rerun step 1 with that id:
+
+```bash
+grok -p "$(cat <<'EOF'
+Read this X post with WebFetch: <URL>
+
+If it belongs to a thread by the same author, reply with only the x.com status URL of the thread's first post. If it is not part of a thread, reply with only: STANDALONE. If the page does not contain the post, reply with only: NOT FOUND.
+EOF
+)" --effort low --tools WebFetch
+```
+
+On `STANDALONE` (usually a reply in someone else's conversation), use grok's full read in step 3 for the post.
+
+## 3. Replies, or fxtwitter down: grok's full read
+
+Run this when the user's request turns on how people reacted, or when step 1 failed outright:
 
 ```bash
 grok -p "$(cat <<'EOF'
@@ -29,30 +66,12 @@ EOF
 )" --effort low --tools WebFetch
 ```
 
+Whenever fxtwitter already returned the text, keep its version and take only the replies from grok.
+
+## Running grok
+
 - **Run it outside the sandbox.** Claude Code parent: set `dangerouslyDisableSandbox: true` on the first attempt. Grok writes session files under `~/.grok/sessions`, so a sandboxed run dies at startup with `Couldn't create session: Permission denied ... FS_PERMISSION_DENIED`.
 - **`--tools WebFetch` is load-bearing.** It pins grok to the one tool the job needs. Unpinned, grok goes hunting for search skills and shells out, headless mode cancels those shell calls, and the run ends with nothing. The name is exactly `WebFetch`: `web_fetch` silently strips the fetch tool and every link comes back NOT FOUND.
-- `--effort low` suffices, this is transcription. Expect about 20s and $0.03 to $0.07 of Grok usage per link.
-- `twitter.com` links and links with `?s=` query strings work as given.
-
-**Several links:** one call per link, run in parallel, each to its own file named by status id, then read the files:
-
-```bash
-grok -p "..." --effort low --tools WebFetch > /tmp/tweet-2103498682532253734.txt 2>&1 &
-grok -p "..." --effort low --tools WebFetch > /tmp/tweet-1519480761749016577.txt 2>&1 &
-wait
-```
-
-## Using the output
-
-- The transcription is context, not the deliverable. Work from it on the user's request; relay the post itself when they asked what it says.
-- `NOT FOUND` means the post is deleted, private, or the link is wrong, and grok includes what the page showed instead. Tell the user which link failed. The post's content comes only from a successful read, never from memory or the URL slug.
-
-## When grok fails
-
-On an auth error, ask the user to run `! grok login`. On quota errors or timeouts, fall back to the fxtwitter API:
-
-```bash
-curl -s https://api.fxtwitter.com/<handle>/status/<id> | jq -r '.tweet | "\(.author.screen_name) \(.created_at)\n\(.text)"'
-```
-
-It returns only the linked post, never the rest of the thread, quoted replies, or media descriptions, so tell the user the context may be partial.
+- `--effort low` suffices, this is transcription. Each call costs $0.03 to $0.07 of Grok usage.
+- On an auth error, ask the user to run `! grok login`. On quota errors, tell the user replies and mid-thread context are unavailable and continue with what fxtwitter returned.
+- Several links needing grok: one call per link, run in parallel with `&`, each redirected to its own `/tmp/tweet-<id>.txt`, then `wait` and read the files.
