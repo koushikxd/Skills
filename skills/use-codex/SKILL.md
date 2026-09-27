@@ -1,6 +1,6 @@
 ---
 name: use-codex
-description: Spawn one or more OpenAI Codex CLI subagents from bash to offload context-heavy work from the parent Claude. Use when the user says "use codex", "build with codex", "ask codex", "get a codex second opinion", "compare codex vs claude", "have two agents try it", or otherwise asks to delegate or parallelize work to Codex. Also use whenever a user asks for a large coding task: research, multi-file refactors, large codebase analysis.
+description: 'Spawn one or more OpenAI Codex CLI subagents from bash to offload context-heavy work from the parent Claude. Use when the user says "use codex", "build with codex", "ask codex", "get a codex second opinion", "compare codex vs claude", "have two agents try it", or otherwise asks to delegate or parallelize work to Codex. Also use whenever a user asks for a large coding task: research, multi-file refactors, large codebase analysis.'
 ---
 
 # Codex Subagent Skill
