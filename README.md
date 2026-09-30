@@ -26,6 +26,7 @@ npx skills add koushikxd/skills --skill deep-research
 | [`babysit-pr`](skills/babysit-pr/SKILL.md) | Watch a pull request until its automated reviewers go quiet. Polls for new bot comments, verifies each claim against the code, fixes what deserves fixing, pushes, repeats. |
 | [`use-codex`](skills/use-codex/SKILL.md) | Delegate context-heavy work to OpenAI Codex CLI subagents from bash. Covers model and reasoning selection, parallel fan-out, session resume, and mandatory verification. |
 | [`view-tweet`](skills/view-tweet/SKILL.md) | Read X/Twitter post links as context: exact text, full thread, metrics, quoted post, and media via the fxtwitter API, with the Grok CLI for mid-thread links and replies. |
+| [`browser`](skills/browser/SKILL.md) | Drive a headless browser with playwright-cli: log into a local dev app once, reuse that login across parallel agents, screenshot UI changes, and attach them to PRs. |
 
 ## Adding more skills
 
