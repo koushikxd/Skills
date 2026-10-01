@@ -1,5 +1,5 @@
 ---
-name: browser
+name: use-browser
 description: Drive a headless browser with playwright-cli to check a web UI, log into a local dev app, take screenshots, and attach them to a PR. Use after finishing UI work that should be seen, when the user asks to open, click through, or screenshot a page, or when a PR needs visual evidence.
 ---
 
