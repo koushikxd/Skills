@@ -1,6 +1,6 @@
 ---
 name: use-browser
-description: Drive a headless browser with playwright-cli. Use when a task needs a real browser: verifying a change you made to a web UI, taking screenshots, or reading and acting on pages that need JavaScript or a login.
+description: "Drive a headless browser with playwright-cli. Use when a task needs a real browser: verifying a change you made to a web UI, taking screenshots, or reading and acting on pages that need JavaScript or a login."
 ---
 
 # Browser
