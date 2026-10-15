@@ -4,7 +4,7 @@
 
 ```bash
 gh pr create --title "..." --body-file body.md \
-  --attach './.playwright-cli/settings-after.png#Settings page after the fix'
+  --attach './.agent-browser/settings-after.png#Settings page after the fix'
 ```
 
-Images are capped at 10 MB. If `gh` rejects `--attach`, open the PR without images and tell the user to upgrade `gh`; the screenshots stay in `.playwright-cli/`.
+Images are capped at 10 MB. If `gh` rejects `--attach`, open the PR without images and tell the user to upgrade `gh`; the screenshots stay in `.agent-browser/`.

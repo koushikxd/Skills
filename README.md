@@ -26,7 +26,7 @@ npx skills add koushikxd/skills --skill deep-research
 | [`babysit-pr`](skills/babysit-pr/SKILL.md) | Watch a pull request until its automated reviewers go quiet. Polls for new bot comments, verifies each claim against the code, fixes what deserves fixing, pushes, repeats. |
 | [`use-codex`](skills/use-codex/SKILL.md) | Delegate context-heavy work to OpenAI Codex CLI subagents from bash. Covers model and reasoning selection, parallel fan-out, session resume, and mandatory verification. |
 | [`view-tweet`](skills/view-tweet/SKILL.md) | Read X/Twitter post links as context: exact text, full thread, metrics, quoted post, and media via the fxtwitter API, with the Grok CLI for mid-thread links and replies. |
-| [`use-browser`](skills/use-browser/SKILL.md) | Give agents a headless browser through playwright-cli: verify UI changes, take screenshots, and use pages that need JavaScript or a login, with one shared login per repo. |
+| [`use-browser`](skills/use-browser/SKILL.md) | Give agents a headless browser through agent-browser: verify UI changes, take screenshots, and use pages that need JavaScript or a login, with one shared login per repo. |
 | [`create-verification-skill`](skills/create-verification-skill/SKILL.md) | Generate a project-local `verify-<app>` skill in `.agents/skills/` (symlinked into `.claude/skills/`) that launches the app, drives it like a user, and captures evidence. Invoke by hand with `/create-verification-skill`. |
 | [`maintain-verification-skill`](skills/maintain-verification-skill/SKILL.md) | Periodic pass that keeps a verification skill and its feature map honest: source readers per feature, one live run of every feature, at most one PR of proven fixes. Invoke by hand with `/maintain-verification-skill`. |
 
